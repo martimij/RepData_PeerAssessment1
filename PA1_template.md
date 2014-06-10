@@ -1,45 +1,58 @@
 # Reproducible Research: Peer Assessment 1
 
 ## Loading and preprocessing the data
-```{r reading_data}
+
+```r
 datafile <- read.csv(unzip("activity.zip"))
 datafile2 <- datafile[complete.cases(datafile),] # removing missing values
 ```
 
 ## What is mean total number of steps taken per day?
-```{r mean}
+
+```r
 sums <- tapply(datafile2$steps, datafile2$date, sum) # sum of steps per day
 sums2 <- sums2<- sums[complete.cases(sums)] # remove NA
 average <- as.character(round(mean(sums2)))
 median <- as.character(round(median(sums2)))
 ```
 
-Mean total number of steps taken per day: `r average`.  
-Median total number of steps taken per day: `r median`  
+Mean total number of steps taken per day: 10766.  
+Median total number of steps taken per day: 10765  
 
-```{r hist, fig.width=10}
+
+```r
 plot(sums, type="h", main="Histogram of total number of steps taken each day", 
      xlab="Day Index", ylab="Total number of steps")
 ```
 
+![plot of chunk hist](figure/hist.png) 
+
 ## What is the average daily activity pattern?
-```{r daily_pattern, fig.width=10}
+
+```r
 datafile2$interval <- as.factor(datafile2$interval) # convert intervals to factors
 interval_means <- tapply(datafile2$steps, datafile2$interval, FUN="mean")
 plot(interval_means, type="l", xlab="5 min intervals", ylab="Average number of steps",
      main="Daily activity pattern")
+```
+
+![plot of chunk daily_pattern](figure/daily_pattern.png) 
+
+```r
 max <- names(which.max(interval_means))
 ```
 
-5 minute interval with maximum number of steps on average is: `r max`  
+5 minute interval with maximum number of steps on average is: 835  
 
 ## Imputing missing values
 
-```{r missing}
+
+```r
 missing <- sum(!complete.cases(datafile))
 ```
-The total number of missing values is: `r missing`
-```{r imputing, fig.width=10}
+The total number of missing values is: 2304
+
+```r
 # Replace all NA steps from the original dataframe with the mean for that interval
 names <- rownames(datafile)
 for (i in seq_along(names)){
@@ -57,12 +70,15 @@ plot(sums_i, type="h", main="Histogram of total number of steps taken each day",
      xlab="Day Index", ylab="Total number of steps")
 ```
 
-Mean number of steps taken per day (after imputation): `r mean_i`.   
-Median number of steps taken per day (after imputation): `r median_i` 
+![plot of chunk imputing](figure/imputing.png) 
+
+Mean number of steps taken per day (after imputation): 10766.   
+Median number of steps taken per day (after imputation): 10766 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r weekday_weekend, fig.width=10, fig.height=5}
+
+```r
 # Add a column with a factor variable for weekday/weekend
 datafile$date <- as.Date(datafile$date)
 days<- weekdays(datafile$date)
@@ -82,4 +98,6 @@ new_frame <- melt(datafile, id=c("interval", "weekend"), measure.vars="steps")
 summary <- dcast(new_frame, interval+weekend ~ variable, mean)
 qplot(interval, steps, data=summary, facets=.~weekend, main="Activity patterns on weekdays and weekends",xlab="Interval", ylab="Average number of steps")
 ```
+
+![plot of chunk weekday_weekend](figure/weekday_weekend.png) 
 
